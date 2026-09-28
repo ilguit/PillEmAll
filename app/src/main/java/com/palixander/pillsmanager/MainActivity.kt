@@ -118,6 +118,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
     var backdating by remember { mutableStateOf(false) }
     var delete by remember { mutableStateOf<Profile?>(null) }
     var deleteIntake by remember { mutableStateOf<Intake?>(null) }
+    var deleteCourse by remember { mutableStateOf<Prescription?>(null) }
     var historyMenu by remember { mutableStateOf<Intake?>(null) }
     var archive by remember { mutableStateOf<Prescription?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -180,7 +181,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                 app.reminders.silence(notificationTarget?.scheduled)
                 act { app.repository.mark(ids, "TAKEN", System.currentTimeMillis()) }
             },
-            snooze = if (notificationTarget?.alarm == true && notificationTarget?.scheduled != null) {{
+            snooze = if (notificationTarget?.scheduled != null) {{
                 val scheduled = notificationTarget!!.scheduled!!
                 notificationActionPerformed = true
                 app.reminders.silence(scheduled)
@@ -209,7 +210,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
         CenterAlignedTopAppBar(
             title = {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(listOf(resources.getString(R.string.today), resources.getString(R.string.profiles), resources.getString(R.string.history))[tab], style = MaterialTheme.typography.titleLarge)
+                    Text(listOf(resources.getString(R.string.today), resources.getString(R.string.history), resources.getString(R.string.profiles))[tab], style = MaterialTheme.typography.titleLarge)
                     if (tab == 0) Text(LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(resources.configuration.locales[0])), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             },
@@ -217,7 +218,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
         )
     }, bottomBar = {
         NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
-            val nav = listOf(Triple(resources.getString(R.string.upcoming), R.drawable.ic_today, resources.getString(R.string.upcoming_description)), Triple(resources.getString(R.string.profiles), R.drawable.ic_profiles, resources.getString(R.string.profiles_description)), Triple(resources.getString(R.string.history), R.drawable.ic_history, resources.getString(R.string.history_description)))
+            val nav = listOf(Triple(resources.getString(R.string.upcoming), R.drawable.ic_today, resources.getString(R.string.upcoming_description)), Triple(resources.getString(R.string.history), R.drawable.ic_history, resources.getString(R.string.history_description)), Triple(resources.getString(R.string.profiles), R.drawable.ic_profiles, resources.getString(R.string.profiles_description)))
             nav.forEachIndexed { index, item ->
                 NavigationBarItem(
                     selected = tab == index,
@@ -262,11 +263,9 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             }
             if (tab == 0) {
                 val timeline = Presentation.timeline(data.intakes, data.profiles, now)
-                if (timeline.isEmpty() && data.profiles.isNotEmpty()) item { EmptyState(resources.getString(R.string.schedule_empty_title), resources.getString(R.string.schedule_empty_body), resources.getString(R.string.open_profiles)) { tab = 1 } }
                 val upcoming = timeline.filter { entry -> entry.rows.any { Schedule.status(it, now) in listOf(Status.WAITING, Status.PLANNED) } }
-                val recentlyTaken = timeline.filterNot { it in upcoming }
-                val sections = upcoming.mapIndexed { index, entry -> (if (index == 0) resources.getString(R.string.upcoming_section) else null) to entry } +
-                    recentlyTaken.mapIndexed { index, entry -> (if (index == 0) resources.getString(R.string.recently_taken) else null) to entry }
+                if (upcoming.isEmpty() && data.profiles.isNotEmpty()) item { EmptyState(resources.getString(R.string.schedule_empty_title), resources.getString(R.string.schedule_empty_body), resources.getString(R.string.open_profiles)) { tab = 2 } }
+                val sections = upcoming.mapIndexed { index, entry -> (if (index == 0) resources.getString(R.string.upcoming_section) else null) to entry }
                 items(sections, key = { "${it.second.profileId}/${it.second.scheduled}" }) { (sectionTitle, entry) ->
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         sectionTitle?.let { Text(it, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)) }
@@ -300,7 +299,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                     }
                 }
             }
-            if (tab == 1) {
+            if (tab == 2) {
                 item { BackupControls(app, enabled = !busy && data.loaded) }
                 item {
                     Button(onClick = { editProfile = Profile(name = "") }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = MaterialTheme.shapes.medium) {
@@ -364,7 +363,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                     } }
                 }
             }
-            if (tab == 2) {
+            if (tab == 1) {
                 item {
                     Column { Text(resources.getString(R.string.show_for), style = MaterialTheme.typography.titleMedium)
                         Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -431,7 +430,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             onDismissRequest = { deleteIntake = null },
             title = { Text(resources.getString(R.string.delete_intake_title)) },
             text = { Text(resources.getString(R.string.delete_intake_body, intake.name, displayDateTime(intake.scheduled, resources))) },
-            confirmButton = { TextButton(onClick = { act { dao.deleteIntake(intake.id) }; deleteIntake = null }) { Text(resources.getString(R.string.delete), color = MaterialTheme.colorScheme.error) } },
+            confirmButton = { TextButton(onClick = { act { app.repository.deleteHistoryIntake(intake.id) }; deleteIntake = null }) { Text(resources.getString(R.string.delete), color = MaterialTheme.colorScheme.error) } },
             dismissButton = { TextButton(onClick = { deleteIntake = null }) { Text(resources.getString(R.string.cancel)) } }
         )
     }
@@ -457,11 +456,30 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
         AlertDialog(
             onDismissRequest = { archive = null },
             title = { Text(resources.getString(if (hasReachedIntake) R.string.archive_course_title else R.string.delete_empty_course_title, p.name)) },
-            text = { Text(if (hasReachedIntake) resources.getString(R.string.archive_course_body) else resources.getString(R.string.delete_empty_course_body, p.name)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Text(if (hasReachedIntake) resources.getString(R.string.archive_course_body) else resources.getString(R.string.delete_empty_course_body, p.name))
+                    if (hasReachedIntake) OutlinedButton(
+                        onClick = { archive = null; deleteCourse = p },
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text(resources.getString(R.string.delete_course), color = MaterialTheme.colorScheme.error) }
+                }
+            },
             confirmButton = { TextButton(onClick = { act { app.repository.archive(p.id) }; archive = null }) {
                 Text(resources.getString(if (hasReachedIntake) R.string.finish else R.string.delete), color = if (hasReachedIntake) LocalContentColor.current else MaterialTheme.colorScheme.error)
             } },
             dismissButton = { TextButton(onClick = { archive = null }) { Text(resources.getString(R.string.cancel)) } }
+        )
+    }
+    deleteCourse?.let { p ->
+        AlertDialog(
+            onDismissRequest = { deleteCourse = null },
+            title = { Text(resources.getString(R.string.delete_course_title, p.name)) },
+            text = { Text(resources.getString(R.string.delete_course_body)) },
+            confirmButton = { TextButton(onClick = { act { app.repository.deleteCourse(p.id) }; deleteCourse = null }) {
+                Text(resources.getString(R.string.delete_course), color = MaterialTheme.colorScheme.error)
+            } },
+            dismissButton = { TextButton(onClick = { deleteCourse = null }) { Text(resources.getString(R.string.cancel)) } }
         )
     }
     group?.let { ids ->

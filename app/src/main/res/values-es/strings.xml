@@ -49,6 +49,9 @@
     <string name="archive_course_body">Se cancelarán las tomas futuras y pendientes. Se conservará el historial.</string>
     <string name="archive_course_title">¿Finalizar el tratamiento de %1$s?</string>
     <string name="delete">Eliminar</string>
+    <string name="delete_course">Eliminar por completo</string>
+    <string name="delete_course_title">¿Eliminar por completo el tratamiento de %1$s?</string>
+    <string name="delete_course_body">El tratamiento, toda su programación y todo el historial de tomas se eliminarán permanentemente. Esta acción no se puede deshacer.</string>
     <string name="delete_profile_body">Se eliminarán permanentemente todas las prescripciones y el historial de este perfil.</string>
     <string name="delete_profile_title">¿Eliminar %1$s?</string>
     <string name="name">Nombre</string>

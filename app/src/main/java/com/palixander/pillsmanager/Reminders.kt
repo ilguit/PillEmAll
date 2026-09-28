@@ -96,7 +96,10 @@ class Reminders(private val context: Context, private val repository: Repository
     }
     private fun snoozeKey(scheduled: Long) = "$SNOOZE_PREFIX$scheduled"
     private fun snoozedUntil(scheduled: Long) = preferences.getLong(snoozeKey(scheduled), 0L)
-    fun silence(scheduled: Long?) { if (scheduled != null) notifications.cancel("intake/$scheduled", 1) else notifications.cancelAll() }
+    fun silence(scheduled: Long?) {
+        AlarmSoundService.stop(context, scheduled)
+        if (scheduled != null) notifications.cancel("intake/$scheduled", 1) else notifications.cancelAll()
+    }
     suspend fun snooze(scheduled: Long) {
         silence(scheduled)
         val until = System.currentTimeMillis() + SNOOZE_MINUTES * 60_000
@@ -118,14 +121,20 @@ class Reminders(private val context: Context, private val repository: Repository
             .setVisibility(Notification.VISIBILITY_PRIVATE).setCategory(Notification.CATEGORY_REMINDER)
             .setPublicVersion(Notification.Builder(context, channelId).setSmallIcon(R.drawable.ic_notification).setContentTitle(context.getString(R.string.reminder_title)).build())
             .setTimeoutAfter(Schedule.DAY)
-        if (actualLevel == Level.ALARM && scheduled != null) {
+        if (scheduled != null) {
             val snooze = Intent(context, SnoozeReceiver::class.java).apply { data = Uri.parse("pills://snooze/$scheduled"); putExtra("scheduled", scheduled) }
             val snoozeAction = PendingIntent.getBroadcast(context, tag.hashCode(), snooze, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            builder.addAction(0, context.getString(R.string.snooze_ten_minutes), snoozeAction)
+        }
+        if (actualLevel == Level.ALARM && scheduled != null) {
             builder.setCategory(Notification.CATEGORY_ALARM).setOngoing(true).setAutoCancel(false)
-                .setFullScreenIntent(tap, true).addAction(0, context.getString(R.string.snooze_ten_minutes), snoozeAction)
+                .setFullScreenIntent(tap, true)
         }
         val notification = builder.build().apply { if (actualLevel == Level.ALARM) flags = flags or Notification.FLAG_INSISTENT or Notification.FLAG_NO_CLEAR }
-        try { notifications.notify(tag, 1, notification) } catch (_: SecurityException) { /* Permission may be revoked between check and delivery. */ }
+        try {
+            notifications.notify(tag, 1, notification)
+            if (actualLevel == Level.ALARM && scheduled != null) AlarmSoundService.start(context, scheduled, sound)
+        } catch (_: SecurityException) { /* Permission may be revoked between check and delivery. */ }
     }
     suspend fun reconcile(deliver: Boolean, summary: Boolean) {
         createChannels()

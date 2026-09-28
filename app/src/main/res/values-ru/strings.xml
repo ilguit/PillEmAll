@@ -52,6 +52,9 @@
     <string name="delete_empty_course_title">Удалить %1$s вместо архивации?</string>
     <string name="delete_empty_course_body">У препарата %1$s ещё не было приёмов. Препарат и его расписание будут безвозвратно удалены, а не перенесены в архив.</string>
     <string name="delete">Удалить</string>
+    <string name="delete_course">Удалить полностью</string>
+    <string name="delete_course_title">Полностью удалить курс %1$s?</string>
+    <string name="delete_course_body">Курс, всё его расписание и вся история приёмов будут удалены без возможности восстановления.</string>
     <string name="delete_profile_body">Все назначения и история этого профиля будут удалены без восстановления.</string>
     <string name="delete_profile_title">Удалить %1$s?</string>
     <string name="delete_intake_title">Удалить этот приём?</string>

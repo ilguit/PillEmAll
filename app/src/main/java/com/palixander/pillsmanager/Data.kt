@@ -117,6 +117,18 @@ class Repository(val db: PillsDatabase) {
         dao.savePrescription(p.copy(archived = true))
         dao.updateIntakes(own.filter { Schedule.status(it, now) in listOf(Status.PLANNED, Status.WAITING) }.map { it.copy(decision = "CANCELLED") })
     }
+    suspend fun deleteCourse(id: String) = db.withTransaction {
+        dao.deletePrescription(id)
+    }
+    suspend fun deleteHistoryIntake(id: String, now: Long = System.currentTimeMillis()) = db.withTransaction {
+        val intake = dao.allIntakes().find { it.id == id } ?: return@withTransaction
+        val prescription = dao.allPrescriptions().find { it.id == intake.prescriptionId }
+        if (prescription?.archived == false && intake.decision != null && now - intake.scheduled < Schedule.DAY) {
+            dao.updateIntakes(listOf(intake.copy(decision = null, takenAt = null, notified = false)))
+        } else {
+            dao.deleteIntake(id)
+        }
+    }
     suspend fun mark(ids: Set<String>, decision: String?, actual: Long = System.currentTimeMillis(), correction: Boolean = false, now: Long = System.currentTimeMillis()) = db.withTransaction {
         require(decision == null || decision in listOf("TAKEN", "MISSED"))
         validateInput(decision != "TAKEN" || actual <= now, ValidationError.FUTURE_ACTUAL_TIME)

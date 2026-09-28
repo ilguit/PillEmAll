@@ -49,6 +49,9 @@
     <string name="archive_course_body">Будучыя прыёмы і прыёмы ў чаканні будуць скасаваныя. Гісторыя захаваецца.</string>
     <string name="archive_course_title">Завяршыць курс %1$s?</string>
     <string name="delete">Выдаліць</string>
+    <string name="delete_course">Выдаліць цалкам</string>
+    <string name="delete_course_title">Цалкам выдаліць курс %1$s?</string>
+    <string name="delete_course_body">Курс, увесь яго расклад і ўся гісторыя прыёмаў будуць выдаленыя без магчымасці аднаўлення.</string>
     <string name="delete_profile_body">Усе прызначэнні і гісторыя гэтага профілю будуць выдаленыя без магчымасці аднаўлення.</string>
     <string name="delete_profile_title">Выдаліць %1$s?</string>
     <string name="name">Імя</string>

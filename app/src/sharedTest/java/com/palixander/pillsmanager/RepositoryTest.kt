@@ -60,17 +60,36 @@ class RepositoryTest {
         assertTrue(repo.dao.allPrescriptions().single().archived)
         assertTrue(repo.dao.allIntakes().isNotEmpty())
     }
+    @Test fun courseCanBePermanentlyDeletedWithAllHistory() = runBlocking {
+        seed()
+        val intake = repo.dao.allIntakes().first()
+        repo.mark(setOf(intake.id), "TAKEN", intake.scheduled, correction = true, now = intake.scheduled)
+        repo.deleteCourse("rx")
+        assertTrue(repo.dao.allPrescriptions().isEmpty())
+        assertTrue(repo.dao.allIntakes().isEmpty())
+        assertEquals(listOf("p"), repo.dao.allProfiles().map { it.id })
+    }
     @Test fun deletionCascadesOnlySelectedProfile() = runBlocking {
         seed(); seed("other", "q")
         repo.dao.deleteProfile("p")
         assertEquals(listOf("q"), repo.dao.allPrescriptions().map { it.profileId })
         assertTrue(repo.dao.allIntakes().all { it.profileId == "q" })
     }
-    @Test fun historyIntakeCanBePermanentlyDeletedWithoutRegeneration() = runBlocking {
+    @Test fun deletingEarlyConfirmationRestoresScheduledIntake() = runBlocking {
         seed()
         val intake = repo.dao.allIntakes().first()
         repo.mark(setOf(intake.id), "TAKEN", intake.scheduled, correction = true, now = intake.scheduled)
-        repo.dao.deleteIntake(intake.id)
+        repo.deleteHistoryIntake(intake.id, now)
+        val restored = repo.dao.allIntakes().single { it.id == intake.id }
+        assertNull(restored.decision)
+        assertNull(restored.takenAt)
+        assertEquals(Status.PLANNED, Schedule.status(restored, now))
+    }
+    @Test fun oldHistoryIntakeCanBePermanentlyDeletedWithoutRegeneration() = runBlocking {
+        seed()
+        val intake = repo.dao.allIntakes().first()
+        repo.mark(setOf(intake.id), "TAKEN", intake.scheduled, correction = true, now = intake.scheduled)
+        repo.deleteHistoryIntake(intake.id, intake.scheduled + Schedule.DAY)
         repo.refresh(now + Schedule.DAY)
         assertFalse(repo.dao.allIntakes().any { it.id == intake.id })
     }

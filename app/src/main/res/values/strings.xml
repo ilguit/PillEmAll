@@ -52,6 +52,9 @@
     <string name="delete_empty_course_title">Delete %1$s instead of archiving?</string>
     <string name="delete_empty_course_body">There have been no intakes of %1$s yet. The medicine and its schedule will be permanently deleted rather than moved to the archive.</string>
     <string name="delete">Delete</string>
+    <string name="delete_course">Delete completely</string>
+    <string name="delete_course_title">Delete the course for %1$s completely?</string>
+    <string name="delete_course_body">The course, its entire schedule, and all intake history will be permanently deleted. This cannot be undone.</string>
     <string name="delete_profile_body">All prescriptions and history for this profile will be permanently deleted.</string>
     <string name="delete_profile_title">Delete %1$s?</string>
     <string name="delete_intake_title">Delete this intake?</string>

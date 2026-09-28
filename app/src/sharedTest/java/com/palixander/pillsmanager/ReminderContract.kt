@@ -40,6 +40,7 @@ abstract class ReminderContract {
         assertEquals(1, active().size)
         assertEquals(context.getString(R.string.reminder_title), active().first().notification.extras.getString("android.title"))
         assertNull(active().first().notification.extras.getString("android.text"))
+        assertEquals(context.getString(R.string.snooze_ten_minutes), active().first().notification.actions.single().title)
         assertTrue(repo.dao.allIntakes().all { it.notified })
         repo.mark(setOf(rows.first().id), "TAKEN")
         reminders.reconcile(false, false); assertEquals(1, active().size)

@@ -49,6 +49,9 @@
     <string name="archive_course_body">As tomadas futuras e pendentes serão canceladas. O histórico será mantido.</string>
     <string name="archive_course_title">Finalizar o tratamento de %1$s?</string>
     <string name="delete">Excluir</string>
+    <string name="delete_course">Excluir completamente</string>
+    <string name="delete_course_title">Excluir completamente o tratamento de %1$s?</string>
+    <string name="delete_course_body">O tratamento, toda a programação e todo o histórico de tomadas serão excluídos permanentemente. Esta ação não pode ser desfeita.</string>
     <string name="delete_profile_body">Todas as prescrições e o histórico deste perfil serão excluídos permanentemente.</string>
     <string name="delete_profile_title">Excluir %1$s?</string>
     <string name="name">Nome</string>
