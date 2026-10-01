@@ -591,19 +591,16 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
 @Composable private fun MedicineDoseRow(medicine: String, dose: String, modifier: Modifier = Modifier, notificationIcon: Boolean = false) {
     val resources = androidx.compose.ui.platform.LocalResources.current
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        if (!notificationIcon) Surface(shape = RoundedCornerShape(10.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+        if (notificationIcon) Icon(
+            painterResource(R.drawable.ic_notification),
+            contentDescription = null,
+            modifier = Modifier.size(24.dp).align(Alignment.CenterVertically),
+            tint = androidx.compose.ui.res.colorResource(R.color.notification_accent)
+        ) else Surface(shape = RoundedCornerShape(10.dp), color = MaterialTheme.colorScheme.primaryContainer) {
             Icon(ImageVector.vectorResource(R.drawable.ic_pill), null, Modifier.padding(8.dp).size(16.dp), tint = MaterialTheme.colorScheme.primary)
         }
         Column(Modifier.weight(1f)) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(medicine, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
-                if (notificationIcon) Icon(
-                    painterResource(R.drawable.ic_notification),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = androidx.compose.ui.res.colorResource(R.color.notification_accent)
-                )
-            }
+            Text(medicine, style = MaterialTheme.typography.titleMedium)
             Text(resources.getString(R.string.dose, dose), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
