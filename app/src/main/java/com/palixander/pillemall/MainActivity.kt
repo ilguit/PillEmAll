@@ -582,20 +582,28 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
         Text(profileName, style = MaterialTheme.typography.titleLarge)
         rows.forEach { i ->
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
-                MedicineDoseRow(i.name, i.dose)
+                MedicineDoseRow(i.name, i.dose, notificationIcon = true)
                 i.takenAt?.let { Text(resources.getString(R.string.taken_at, displayDateTime(it, resources)), style = MaterialTheme.typography.bodySmall) }
             }
         }
     }
 }
-@Composable private fun MedicineDoseRow(medicine: String, dose: String, modifier: Modifier = Modifier) {
+@Composable private fun MedicineDoseRow(medicine: String, dose: String, modifier: Modifier = Modifier, notificationIcon: Boolean = false) {
     val resources = androidx.compose.ui.platform.LocalResources.current
     Row(modifier.fillMaxWidth(), verticalAlignment = Alignment.Top, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        Surface(shape = RoundedCornerShape(10.dp), color = MaterialTheme.colorScheme.primaryContainer) {
+        if (!notificationIcon) Surface(shape = RoundedCornerShape(10.dp), color = MaterialTheme.colorScheme.primaryContainer) {
             Icon(ImageVector.vectorResource(R.drawable.ic_pill), null, Modifier.padding(8.dp).size(16.dp), tint = MaterialTheme.colorScheme.primary)
         }
         Column(Modifier.weight(1f)) {
-            Text(medicine, style = MaterialTheme.typography.titleMedium)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(medicine, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium)
+                if (notificationIcon) Icon(
+                    painterResource(R.drawable.ic_notification),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = androidx.compose.ui.res.colorResource(R.color.notification_accent)
+                )
+            }
             Text(resources.getString(R.string.dose, dose), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
@@ -773,7 +781,6 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
     if (showCover) PillCoverDialog { showCover = false }
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))) {
-            HorizontalDivider(thickness = 3.dp, color = PillColors.button)
             if (close != null) IconButton(onClick = close, modifier = Modifier.align(Alignment.Start)) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_close), resources.getString(R.string.close))
             }
