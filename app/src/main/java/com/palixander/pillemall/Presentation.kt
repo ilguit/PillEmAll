@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import java.time.LocalTime
 import java.util.Locale

@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import android.Manifest
 import android.app.DatePickerDialog
@@ -173,7 +173,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                 group = null
             }
         }
-        error?.let { text -> AlertDialog(onDismissRequest = { error = null }, title = { Text(resources.getString(R.string.action_failed)) }, text = { Text(text) }, confirmButton = { TextButton(onClick = { error = null }) { Text(resources.getString(R.string.understood)) } }) }
+        error?.let { text -> AlertDialog(onDismissRequest = { error = null }, title = { Text(resources.getString(R.string.action_failed)) }, text = { Text(text) }, confirmButton = { TextButton(colors = PillActionColors.neutral(), onClick = { error = null }) { Text(resources.getString(R.string.understood)) } }) }
         return
     }
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
@@ -206,12 +206,12 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                         }
                         Text(resources.getString(R.string.reminders_explanation), style = MaterialTheme.typography.bodyMedium)
                         Column(horizontalAlignment = Alignment.Start) {
-                        TextButton(onClick = {
+                        TextButton(colors = PillActionColors.neutral(), onClick = {
                             if (activity.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) permissionRequest.launch(Manifest.permission.POST_NOTIFICATIONS)
                             else activity.startActivity(Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, activity.packageName))
                         }) { Text(resources.getString(R.string.notifications)) }
-                        TextButton(onClick = { activity.startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${activity.packageName}"))) }) { Text(resources.getString(R.string.exact_reminders)) }
-                        if (needsFullScreenAccess && android.os.Build.VERSION.SDK_INT >= 34) TextButton(onClick = {
+                        TextButton(colors = PillActionColors.neutral(), onClick = { activity.startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, Uri.parse("package:${activity.packageName}"))) }) { Text(resources.getString(R.string.exact_reminders)) }
+                        if (needsFullScreenAccess && android.os.Build.VERSION.SDK_INT >= 34) TextButton(colors = PillActionColors.neutral(), onClick = {
                             activity.startActivity(Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:${activity.packageName}")))
                         }) { Text(resources.getString(R.string.full_screen_alarms)) }
                         }
@@ -235,7 +235,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         sectionTitle?.let { Text(it, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)) }
                         Card(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
-                        if (entry.rows.any { Schedule.status(it, now) == Status.WAITING }) HorizontalDivider(thickness = 3.dp, color = PillColors.button)
+                        if (entry.rows.any { Schedule.status(it, now) == Status.WAITING }) HorizontalDivider(thickness = 3.dp, color = MaterialTheme.colorScheme.primary)
                         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                 Column {
@@ -252,12 +252,12 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                             if (waiting.isNotEmpty()) {
                                 FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), onClick = { act { app.repository.mark(waiting.map { it.id }.toSet(), "TAKEN", now) } }, shape = MaterialTheme.shapes.small) { Icon(ImageVector.vectorResource(R.drawable.ic_check), null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(resources.getString(R.string.taken)) }
-                                    TextButton(onClick = {
+                                    TextButton(colors = PillActionColors.confirm(), onClick = {
                                         group = waiting.map { it.id }.toSet(); correcting = false; backdating = true
                                     }) { Text(resources.getString(R.string.taken_earlier)) }
-                                    TextButton(onClick = { act { app.repository.mark(waiting.map { it.id }.toSet(), "MISSED", now) } }) { Text(resources.getString(R.string.skip)) }
+                                    TextButton(colors = PillActionColors.neutral(), onClick = { act { app.repository.mark(waiting.map { it.id }.toSet(), "MISSED", now) } }) { Text(resources.getString(R.string.skip)) }
                                 }
-                            } else if (actionable.isNotEmpty()) FilledTonalButton(onClick = {
+                            } else if (actionable.isNotEmpty()) FilledTonalButton(colors = PillActionColors.confirmTonal(), onClick = {
                                 group = actionable.map { it.id }.toSet(); correcting = false; backdating = false
                             }) { Text(resources.getString(R.string.taken_advance)) }
                         }
@@ -294,7 +294,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                                 Icon(painterResource(R.drawable.ic_delete), contentDescription = resources.getString(R.string.delete_profile, p.name), tint = MaterialTheme.colorScheme.error)
                             }
                         })
-                        FilledTonalButton(modifier = Modifier.fillMaxWidth(), onClick = { editPrescription = Prescription(profileId = p.id, name = "", dose = "", times = "09:00", start = LocalDate.now().toString(), end = null, zone = ZoneId.systemDefault().id, generatedUntil = now) }) {
+                        FilledTonalButton(colors = PillActionColors.confirmTonal(), modifier = Modifier.fillMaxWidth(), onClick = { editPrescription = Prescription(profileId = p.id, name = "", dose = "", times = "09:00", start = LocalDate.now().toString(), end = null, zone = ZoneId.systemDefault().id, generatedUntil = now) }) {
                             Text(resources.getString(R.string.add_medicine))
                         }
                         data.prescriptions.filter { it.profileId == p.id && !it.archived }
@@ -323,13 +323,13 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                                         Icon(painterResource(R.drawable.ic_edit), contentDescription = resources.getString(R.string.edit_medicine, r.name))
                                     }
                                     IconButton(onClick = { archive = r }) {
-                                        Icon(painterResource(R.drawable.ic_archive), contentDescription = resources.getString(R.string.archive_course, r.name), tint = MaterialTheme.colorScheme.primary)
+                                        Icon(painterResource(R.drawable.ic_archive), contentDescription = resources.getString(R.string.archive_course, r.name), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                                     }
                                 }
                             })
                             if (r.archived || ended) {
                                 StatusPill(if (r.archived) resources.getString(R.string.archived) else resources.getString(R.string.course_finished))
-                                TextButton(onClick = { editPrescription = r.copy(id = java.util.UUID.randomUUID().toString(), start = LocalDate.now(ZoneId.of(r.zone)).toString(), end = null, archived = false, generatedUntil = now) }) { Text(resources.getString(R.string.repeat_course)) }
+                                TextButton(colors = PillActionColors.neutral(), onClick = { editPrescription = r.copy(id = java.util.UUID.randomUUID().toString(), start = LocalDate.now(ZoneId.of(r.zone)).toString(), end = null, archived = false, generatedUntil = now) }) { Text(resources.getString(R.string.repeat_course)) }
                             }
                         }
                     } }
@@ -396,14 +396,14 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
         }
     }
     editPrescription?.let { p -> PrescriptionDialog(p, { editPrescription = null }) { value -> act { app.repository.save(value) }; editPrescription = null } }
-    delete?.let { p -> AlertDialog(onDismissRequest = { delete = null }, title = { Text(resources.getString(R.string.delete_profile_title, p.name)) }, text = { Text(resources.getString(R.string.delete_profile_body)) }, confirmButton = { TextButton(onClick = { act { dao.deleteProfile(p.id) }; delete = null }) { Text(resources.getString(R.string.delete)) } }, dismissButton = { TextButton(onClick = { delete = null }) { Text(resources.getString(R.string.cancel)) } }) }
+    delete?.let { p -> AlertDialog(onDismissRequest = { delete = null }, title = { Text(resources.getString(R.string.delete_profile_title, p.name)) }, text = { Text(resources.getString(R.string.delete_profile_body)) }, confirmButton = { TextButton(colors = PillActionColors.destructive(), onClick = { act { dao.deleteProfile(p.id) }; delete = null }) { Text(resources.getString(R.string.delete)) } }, dismissButton = { TextButton(colors = PillActionColors.neutral(), onClick = { delete = null }) { Text(resources.getString(R.string.cancel)) } }) }
     deleteIntake?.let { intake ->
         AlertDialog(
             onDismissRequest = { deleteIntake = null },
             title = { Text(resources.getString(R.string.delete_intake_title)) },
             text = { Text(resources.getString(R.string.delete_intake_body, intake.name, displayDateTime(intake.scheduled, resources))) },
-            confirmButton = { TextButton(onClick = { act { app.repository.deleteHistoryIntake(intake.id) }; deleteIntake = null }) { Text(resources.getString(R.string.delete), color = MaterialTheme.colorScheme.error) } },
-            dismissButton = { TextButton(onClick = { deleteIntake = null }) { Text(resources.getString(R.string.cancel)) } }
+            confirmButton = { TextButton(colors = PillActionColors.destructive(), onClick = { act { app.repository.deleteHistoryIntake(intake.id) }; deleteIntake = null }) { Text(resources.getString(R.string.delete)) } },
+            dismissButton = { TextButton(colors = PillActionColors.neutral(), onClick = { deleteIntake = null }) { Text(resources.getString(R.string.cancel)) } }
         )
     }
     historyMenu?.let { intake ->
@@ -431,16 +431,16 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Text(if (hasReachedIntake) resources.getString(R.string.archive_course_body) else resources.getString(R.string.delete_empty_course_body, p.name))
-                    if (hasReachedIntake) OutlinedButton(
+                    if (hasReachedIntake) OutlinedButton(colors = PillActionColors.destructive(),
                         onClick = { archive = null; deleteCourse = p },
                         modifier = Modifier.fillMaxWidth()
                     ) { Text(resources.getString(R.string.delete_course), color = MaterialTheme.colorScheme.error) }
                 }
             },
-            confirmButton = { TextButton(onClick = { act { app.repository.archive(p.id) }; archive = null }) {
-                Text(resources.getString(if (hasReachedIntake) R.string.finish else R.string.delete), color = if (hasReachedIntake) LocalContentColor.current else MaterialTheme.colorScheme.error)
+            confirmButton = { TextButton(colors = if (hasReachedIntake) PillActionColors.confirm() else PillActionColors.destructive(), onClick = { act { app.repository.archive(p.id) }; archive = null }) {
+                Text(resources.getString(if (hasReachedIntake) R.string.finish else R.string.delete))
             } },
-            dismissButton = { TextButton(onClick = { archive = null }) { Text(resources.getString(R.string.cancel)) } }
+            dismissButton = { TextButton(colors = PillActionColors.neutral(), onClick = { archive = null }) { Text(resources.getString(R.string.cancel)) } }
         )
     }
     deleteCourse?.let { p ->
@@ -448,10 +448,10 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             onDismissRequest = { deleteCourse = null },
             title = { Text(resources.getString(R.string.delete_course_title, p.name)) },
             text = { Text(resources.getString(R.string.delete_course_body)) },
-            confirmButton = { TextButton(onClick = { act { app.repository.deleteCourse(p.id) }; deleteCourse = null }) {
-                Text(resources.getString(R.string.delete_course), color = MaterialTheme.colorScheme.error)
+            confirmButton = { TextButton(colors = PillActionColors.destructive(), onClick = { act { app.repository.deleteCourse(p.id) }; deleteCourse = null }) {
+                Text(resources.getString(R.string.delete_course))
             } },
-            dismissButton = { TextButton(onClick = { deleteCourse = null }) { Text(resources.getString(R.string.cancel)) } }
+            dismissButton = { TextButton(colors = PillActionColors.neutral(), onClick = { deleteCourse = null }) { Text(resources.getString(R.string.cancel)) } }
         )
     }
     group?.let { ids ->
@@ -461,7 +461,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             act { app.repository.mark(selected, decision, actual, correction) }; group = null
         }
     }
-    error?.let { text -> AlertDialog(onDismissRequest = { error = null }, title = { Text(resources.getString(R.string.action_failed)) }, text = { Text(text) }, confirmButton = { TextButton(onClick = { error = null }) { Text(resources.getString(R.string.understood)) } }) }
+    error?.let { text -> AlertDialog(onDismissRequest = { error = null }, title = { Text(resources.getString(R.string.action_failed)) }, text = { Text(text) }, confirmButton = { TextButton(colors = PillActionColors.neutral(), onClick = { error = null }) { Text(resources.getString(R.string.understood)) } }) }
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable private fun NotificationIntakeScreen(
@@ -490,7 +490,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                 item { Text(android.text.format.DateFormat.getTimeFormat(LocalContext.current).format(java.util.Date(scheduled)), style = PillTypography.time) }
             }
             if (snooze != null && groups.isNotEmpty()) item {
-                OutlinedButton(modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), enabled = !busy, onClick = snooze) {
+                OutlinedButton(colors = PillActionColors.neutral(), modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), enabled = !busy, onClick = snooze) {
                     Text(resources.getString(R.string.snooze_ten_minutes))
                 }
             }
@@ -521,19 +521,19 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                         Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), enabled = !busy, onClick = { markTaken(medicineIds) }) {
                             Icon(ImageVector.vectorResource(R.drawable.ic_check), null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(resources.getString(R.string.mark_taken))
                         }
-                        OutlinedButton(modifier = Modifier.fillMaxWidth(), enabled = !busy, onClick = { moreActions(medicineIds) }) {
+                        OutlinedButton(colors = PillActionColors.neutral(), modifier = Modifier.fillMaxWidth(), enabled = !busy, onClick = { moreActions(medicineIds) }) {
                             Text(resources.getString(R.string.other_time_or_skip))
                         }
                     }
                 }
             }
             if (groups.size > 1) item {
-                FilledTonalButton(
+                FilledTonalButton(colors = PillActionColors.confirmTonal(),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !busy && rows.isNotEmpty(),
                     onClick = { markTaken(rows.map { it.id }.toSet()) }
                 ) { Text(resources.getString(R.string.mark_all_profiles)) }
-                TextButton(
+                TextButton(colors = PillActionColors.neutral(),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !busy && rows.isNotEmpty(),
                     onClick = { moreActions(rows.map { it.id }.toSet()) }
@@ -610,7 +610,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
 }
 @Composable private fun FormDialog(title: String, close: () -> Unit, save: () -> Unit, valid: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
     val resources = androidx.compose.ui.platform.LocalResources.current
-    AlertDialog(onDismissRequest = close, title = { Text(title) }, text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp), content = content) }, confirmButton = { Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), onClick = save, enabled = valid) { Text(resources.getString(R.string.save)) } }, dismissButton = { TextButton(onClick = close) { Text(resources.getString(R.string.cancel)) } })
+    AlertDialog(onDismissRequest = close, title = { Text(title) }, text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp), content = content) }, confirmButton = { Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), onClick = save, enabled = valid) { Text(resources.getString(R.string.save)) } }, dismissButton = { TextButton(colors = PillActionColors.neutral(), onClick = close) { Text(resources.getString(R.string.cancel)) } })
 }
 @Composable private fun PrescriptionDialog(p: Prescription, close: () -> Unit, save: (Prescription) -> Unit) {
     val resources = androidx.compose.ui.platform.LocalResources.current
@@ -640,13 +640,13 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
     val soundTitle = reminderSound?.let { value -> runCatching { android.media.RingtoneManager.getRingtone(context, Uri.parse(value))?.getTitle(context) }.getOrNull() }
     fun pickDate(value: String, set: (String) -> Unit) {
         val date = runCatching { LocalDate.parse(value) }.getOrDefault(LocalDate.now(ZoneId.of(p.zone)))
-        DatePickerDialog(context, { _, y, m, d -> set(LocalDate.of(y, m + 1, d).toString()) }, date.year, date.monthValue - 1, date.dayOfMonth).show()
+        DatePickerDialog(context, { _, y, m, d -> set(LocalDate.of(y, m + 1, d).toString()) }, date.year, date.monthValue - 1, date.dayOfMonth).showWithActionColors()
     }
     fun pickTime(current: LocalTime = LocalTime.of(9, 0), replace: LocalTime? = null) {
         TimePickerDialog(context, { _, h, m ->
             val selected = LocalTime.of(h, m)
             times = (times.filterNot { it == replace } + selected).distinct().sorted()
-        }, current.hour, current.minute, android.text.format.DateFormat.is24HourFormat(context)).show()
+        }, current.hour, current.minute, android.text.format.DateFormat.is24HourFormat(context)).showWithActionColors()
     }
     val valid = runCatching { require(name.isNotBlank() && dose.isNotBlank() && times.isNotEmpty()); val first = LocalDate.parse(start); require(end.isBlank() || !LocalDate.parse(end).isBefore(first)) }.isSuccess
     FormDialog(resources.getString(R.string.prescription), close, { save(p.copy(name = name, dose = dose, times = times.joinToString(","), start = start, end = end.takeIf { it.isNotBlank() }, reminderLevel = reminderLevel.name, reminderSound = reminderSound)) }, valid) {
@@ -655,13 +655,13 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
         Text(resources.getString(R.string.intake_time), style = MaterialTheme.typography.titleSmall)
         times.forEach { time ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                OutlinedButton(onClick = { pickTime(time, time) }, modifier = Modifier.weight(1f)) { Text(android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(time.atDate(LocalDate.now()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))) }
+                OutlinedButton(colors = PillActionColors.neutral(), onClick = { pickTime(time, time) }, modifier = Modifier.weight(1f)) { Text(android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(time.atDate(LocalDate.now()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))) }
                 IconButton(onClick = { times = times - time }) {
                     Icon(painterResource(R.drawable.ic_close), contentDescription = resources.getString(R.string.remove_time, android.text.format.DateFormat.getTimeFormat(context).format(java.util.Date(time.atDate(LocalDate.now()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()))))
                 }
             }
         }
-        OutlinedButton(onClick = { pickTime() }) { Text(resources.getString(R.string.add_time)) }
+        OutlinedButton(colors = PillActionColors.neutral(), onClick = { pickTime() }) { Text(resources.getString(R.string.add_time)) }
         Text(resources.getString(R.string.reminder_level), style = MaterialTheme.typography.titleSmall)
         Reminders.Level.entries.forEach { level ->
             val title = when (level) {
@@ -680,14 +680,14 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             }
         }
         if (reminderLevel != Reminders.Level.QUIET) {
-            OutlinedButton(onClick = ::chooseRingtone, modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(colors = PillActionColors.neutral(), onClick = ::chooseRingtone, modifier = Modifier.fillMaxWidth()) {
                 Text(resources.getString(R.string.reminder_sound, soundTitle ?: resources.getString(R.string.system_default)))
             }
-            if (reminderSound != null) TextButton(onClick = { reminderSound = null }) { Text(resources.getString(R.string.use_system_default)) }
+            if (reminderSound != null) TextButton(colors = PillActionColors.neutral(), onClick = { reminderSound = null }) { Text(resources.getString(R.string.use_system_default)) }
         }
         Text(resources.getString(R.string.daily_zone, p.zone), style = MaterialTheme.typography.bodySmall)
-        OutlinedTextField(start, { start = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.course_start)) }, trailingIcon = { TextButton(onClick = { pickDate(start) { start = it } }) { Text(resources.getString(R.string.date)) } })
-        OutlinedTextField(end, { end = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.course_end)) }, trailingIcon = { TextButton(onClick = { pickDate(end) { end = it } }) { Text(resources.getString(R.string.date)) } }, supportingText = { Text(resources.getString(R.string.course_end_hint)) })
+        OutlinedTextField(start, { start = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.course_start)) }, trailingIcon = { TextButton(colors = PillActionColors.neutral(), onClick = { pickDate(start) { start = it } }) { Text(resources.getString(R.string.date)) } })
+        OutlinedTextField(end, { end = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.course_end)) }, trailingIcon = { TextButton(colors = PillActionColors.neutral(), onClick = { pickDate(end) { end = it } }) { Text(resources.getString(R.string.date)) } }, supportingText = { Text(resources.getString(R.string.course_end_hint)) })
         if (!valid) Text(resources.getString(R.string.prescription_invalid), color = MaterialTheme.colorScheme.error)
     }
 }
@@ -719,7 +719,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                     Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Text(profiles.find { it.id == profileId }?.name ?: "", Modifier.weight(1f), style = MaterialTheme.typography.titleLarge)
-                            if (list.size > 1) TextButton(onClick = { selected = selected + list.map { it.id } }) { Text(resources.getString(R.string.select_all)) }
+                            if (list.size > 1) TextButton(colors = PillActionColors.neutral(), onClick = { selected = selected + list.map { it.id } }) { Text(resources.getString(R.string.select_all)) }
                         }
                         list.forEach { i -> Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Top) {
                             Checkbox(checked = i.id in selected, onCheckedChange = { checked -> selected = if (checked) selected + i.id else selected - i.id })
@@ -740,30 +740,30 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                     enabled = selectedRows.isNotEmpty(),
                     onClick = { save(selected, "TAKEN", scheduled) }
                 ) { Text(resources.getString(R.string.taken_on_time)) }
-                if (!correction) FilledTonalButton(modifier = Modifier.fillMaxWidth(), enabled = selected.isNotEmpty(), onClick = { save(selected, "TAKEN", now) }) { Text(resources.getString(R.string.taken_now)) }
-                if (!editActual) OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { editActual = true }) { Text(resources.getString(R.string.choose_other_time)) }
+                if (!correction) FilledTonalButton(colors = PillActionColors.confirmTonal(), modifier = Modifier.fillMaxWidth(), enabled = selected.isNotEmpty(), onClick = { save(selected, "TAKEN", now) }) { Text(resources.getString(R.string.taken_now)) }
+                if (!editActual) OutlinedButton(colors = PillActionColors.neutral(), modifier = Modifier.fillMaxWidth(), onClick = { editActual = true }) { Text(resources.getString(R.string.choose_other_time)) }
                 if (editActual) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Text(resources.getString(R.string.actual_time_title), style = MaterialTheme.typography.titleMedium)
                     OutlinedTextField(actual, { actual = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.actual_time_hint)) }, supportingText = { Text(resources.getString(R.string.phone_zone, ZoneId.systemDefault().id)) })
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = {
+                        TextButton(colors = PillActionColors.neutral(), onClick = {
                             val value = runCatching { LocalDateTime.parse(actual, stamp).toLocalDate() }.getOrDefault(LocalDate.now())
-                            DatePickerDialog(context, { _, y, m, d -> changeActual(date = LocalDate.of(y, m + 1, d)) }, value.year, value.monthValue - 1, value.dayOfMonth).show()
+                            DatePickerDialog(context, { _, y, m, d -> changeActual(date = LocalDate.of(y, m + 1, d)) }, value.year, value.monthValue - 1, value.dayOfMonth).showWithActionColors()
                         }) { Text(resources.getString(R.string.pick_date)) }
-                        TextButton(onClick = {
+                        TextButton(colors = PillActionColors.neutral(), onClick = {
                             val value = runCatching { LocalDateTime.parse(actual, stamp).toLocalTime() }.getOrDefault(LocalTime.now())
-                            TimePickerDialog(context, { _, h, m -> changeActual(time = LocalTime.of(h, m)) }, value.hour, value.minute, android.text.format.DateFormat.is24HourFormat(context)).show()
+                            TimePickerDialog(context, { _, h, m -> changeActual(time = LocalTime.of(h, m)) }, value.hour, value.minute, android.text.format.DateFormat.is24HourFormat(context)).showWithActionColors()
                         }) { Text(resources.getString(R.string.pick_time)) }
                     }
                     if (parsed == null || parsed > now) Text(resources.getString(R.string.actual_time_invalid), color = MaterialTheme.colorScheme.error)
                     Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), modifier = Modifier.fillMaxWidth(), enabled = selected.isNotEmpty() && parsed != null && parsed <= now, onClick = { save(selected, "TAKEN", parsed!!) }) { Text(resources.getString(R.string.save_actual_time)) }
                 }
-                if (correction || rows.filter { it.id in selected }.all { Schedule.status(it, now) == Status.WAITING }) OutlinedButton(modifier = Modifier.fillMaxWidth(), enabled = selected.isNotEmpty(), onClick = { save(selected, "MISSED", now) }) { Text(resources.getString(R.string.mark_missed)) }
-                if (correction) TextButton(onClick = { save(selected, null, now) }, enabled = selected.isNotEmpty()) { Text(resources.getString(R.string.undo_mark)) }
+                if (correction || rows.filter { it.id in selected }.all { Schedule.status(it, now) == Status.WAITING }) OutlinedButton(colors = PillActionColors.neutral(), modifier = Modifier.fillMaxWidth(), enabled = selected.isNotEmpty(), onClick = { save(selected, "MISSED", now) }) { Text(resources.getString(R.string.mark_missed)) }
+                if (correction) TextButton(colors = PillActionColors.neutral(), onClick = { save(selected, null, now) }, enabled = selected.isNotEmpty()) { Text(resources.getString(R.string.undo_mark)) }
             }
         }
-    }, confirmButton = { TextButton(onClick = close) { Text(resources.getString(R.string.close)) } })
+    }, confirmButton = { TextButton(colors = PillActionColors.neutral(), onClick = close) { Text(resources.getString(R.string.close)) } })
 }
 
 /** A content-sized header keeps translated titles and enlarged text visible. */
@@ -773,6 +773,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
     if (showCover) PillCoverDialog { showCover = false }
     Surface(color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))) {
+            HorizontalDivider(thickness = 3.dp, color = PillColors.button)
             if (close != null) IconButton(onClick = close, modifier = Modifier.align(Alignment.Start)) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_close), resources.getString(R.string.close))
             }

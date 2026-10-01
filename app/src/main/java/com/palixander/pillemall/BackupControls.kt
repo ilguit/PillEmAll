@@ -1,6 +1,6 @@
 @file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -95,10 +95,10 @@ fun BackupControls(app: PillsApp, enabled: Boolean) {
             if (expanded) {
                 Text(resources.getString(R.string.backup_description), style = MaterialTheme.typography.bodySmall)
                 FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    OutlinedButton(enabled = enabled && !busy, onClick = {
+                    OutlinedButton(colors = PillActionColors.neutral(), enabled = enabled && !busy, onClick = {
                         export.launch("pillsmanager-${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd-HHmmss"))}.json")
                     }) { Text(resources.getString(R.string.export)) }
-                    OutlinedButton(enabled = enabled && !busy, onClick = { import.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) { Text(resources.getString(R.string.backup_import)) }
+                    OutlinedButton(colors = PillActionColors.neutral(), enabled = enabled && !busy, onClick = { import.launch(arrayOf("application/json", "text/plain", "application/octet-stream")) }) { Text(resources.getString(R.string.backup_import)) }
                 }
                 if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
             }
@@ -109,18 +109,18 @@ fun BackupControls(app: PillsApp, enabled: Boolean) {
             onDismissRequest = { if (!busy) pending = null },
             title = { Text(resources.getString(R.string.import_title)) },
             text = { Text(resources.getString(R.string.import_body, backup.profiles.size, backup.prescriptions.size, backup.prescriptions.count { it.archived }, backup.intakes.size)) },
-            confirmButton = { TextButton(enabled = !busy, onClick = {
+            confirmButton = { TextButton(colors = PillActionColors.destructive(), enabled = !busy, onClick = {
                 run {
                     app.restoreBackup(backup)
                     pending = null
                     message = resources.getString(R.string.import_complete)
                 }
             }) { Text(resources.getString(R.string.import_confirm)) } },
-            dismissButton = { TextButton(enabled = !busy, onClick = { pending = null }) { Text(resources.getString(R.string.cancel)) } }
+            dismissButton = { TextButton(colors = PillActionColors.neutral(), enabled = !busy, onClick = { pending = null }) { Text(resources.getString(R.string.cancel)) } }
         )
     }
     message?.let { text ->
         AlertDialog(onDismissRequest = { message = null }, title = { Text(resources.getString(R.string.backup_title)) },
-            text = { Text(text) }, confirmButton = { TextButton(onClick = { message = null }) { Text(resources.getString(R.string.understood)) } })
+            text = { Text(text) }, confirmButton = { TextButton(colors = PillActionColors.neutral(), onClick = { message = null }) { Text(resources.getString(R.string.understood)) } })
     }
 }

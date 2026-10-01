@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import android.content.BroadcastReceiver
 import android.content.Context

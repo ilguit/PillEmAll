@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import android.Manifest
 import android.app.Application

@@ -5,3 +5,5 @@ local.properties
 .idea/
 *.iml
 .local-tooling/
+.release-signing/
+signing.properties

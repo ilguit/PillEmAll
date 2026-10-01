@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

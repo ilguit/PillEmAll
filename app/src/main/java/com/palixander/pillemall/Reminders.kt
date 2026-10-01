@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import android.Manifest
 import android.app.*
@@ -116,10 +116,10 @@ class Reminders(private val context: Context, private val repository: Repository
             putExtra("alarm", actualLevel == Level.ALARM)
         }
         val tap = PendingIntent.getActivity(context, tag.hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val builder = Notification.Builder(context, channelId).setSmallIcon(R.drawable.ic_notification)
+        val builder = Notification.Builder(context, channelId).setSmallIcon(R.drawable.ic_notification).setColor(context.getColor(R.color.notification_accent))
             .setContentTitle(context.getString(R.string.reminder_title)).setContentIntent(tap).setAutoCancel(true)
             .setVisibility(Notification.VISIBILITY_PRIVATE).setCategory(Notification.CATEGORY_REMINDER)
-            .setPublicVersion(Notification.Builder(context, channelId).setSmallIcon(R.drawable.ic_notification).setContentTitle(context.getString(R.string.reminder_title)).build())
+            .setPublicVersion(Notification.Builder(context, channelId).setSmallIcon(R.drawable.ic_notification).setColor(context.getColor(R.color.notification_accent)).setContentTitle(context.getString(R.string.reminder_title)).build())
             .setTimeoutAfter(Schedule.DAY)
         if (scheduled != null) {
             val snooze = Intent(context, SnoozeReceiver::class.java).apply { data = Uri.parse("pills://snooze/$scheduled"); putExtra("scheduled", scheduled) }

@@ -1,14 +1,21 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.kapt")
 }
+val releaseSigningFile = rootProject.file("signing.properties")
+val releaseSigning = Properties().apply {
+    if (releaseSigningFile.isFile) releaseSigningFile.inputStream().use { load(it) }
+}
+
 android {
-    namespace = "com.palixander.pillsmanager"
+    namespace = "com.palixander.pillemall"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.palixander.pillsmanager"
+        applicationId = "com.palixander.pillemall"
         minSdk = 33
         targetSdk = 36
         versionCode = 1
@@ -16,7 +23,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     buildFeatures { compose = true }
-    buildTypes { getByName("debug") { isPseudoLocalesEnabled = true } }
+    signingConfigs {
+        if (releaseSigningFile.isFile) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigning.getProperty("storeFile"))
+                storePassword = releaseSigning.getProperty("storePassword")
+                keyAlias = releaseSigning.getProperty("keyAlias")
+                keyPassword = releaseSigning.getProperty("keyPassword")
+            }
+        }
+    }
+    buildTypes {
+        getByName("debug") { isPseudoLocalesEnabled = true }
+        getByName("release") {
+            if (releaseSigningFile.isFile) signingConfig = signingConfigs.getByName("release")
+        }
+    }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     sourceSets {
         getByName("test").java.srcDir("src/sharedTest/java")

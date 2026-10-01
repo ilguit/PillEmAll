@@ -1,7 +1,8 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Shapes
 import androidx.compose.material3.Typography
@@ -9,18 +10,19 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-/** Deep red is a filled-action color; the brighter dark-theme primary remains legible as text. */
+/** Red brand accents shared by actions and screen decoration. */
 object PillColors {
     val button = Color(0xFFAE3028)
     val onButton = Color(0xFFFFF9F1)
     val success: Color
-        @Composable get() = if (isSystemInDarkTheme()) Color(0xFFA1D4AA) else Color(0xFF245C3B)
+        @Composable get() = MaterialTheme.colorScheme.onSurfaceVariant
     val warning: Color
         @Composable get() = if (isSystemInDarkTheme()) Color(0xFFF0C875) else Color(0xFF795208)
 }
@@ -36,8 +38,8 @@ private val DarkPillColors = darkColorScheme(
     inversePrimary = Color(0xFFAE3028),
     secondary = Color(0xFFBCB6AD), onSecondary = Color(0xFF242321),
     secondaryContainer = Color(0xFF393530), onSecondaryContainer = Color(0xFFF2EEE5),
-    tertiary = Color(0xFFA1D4AA), onTertiary = Color(0xFF12351E),
-    tertiaryContainer = Color(0xFF243E2C), onTertiaryContainer = Color(0xFFC1E8C7),
+    tertiary = Color(0xFFFF6B6B), onTertiary = Color(0xFF240606),
+    tertiaryContainer = Color(0xFF452323), onTertiaryContainer = Color(0xFFFFDAD5),
     background = Color(0xFF141414), onBackground = Color(0xFFF2EEE5),
     surface = Color(0xFF202020), onSurface = Color(0xFFF2EEE5),
     surfaceVariant = Color(0xFF302C28), onSurfaceVariant = Color(0xFFBCB6AD),
@@ -59,8 +61,8 @@ private val LightPillColors = lightColorScheme(
     inversePrimary = Color(0xFFFF6B6B),
     secondary = Color(0xFF666159), onSecondary = Color(0xFFFFFDF8),
     secondaryContainer = Color(0xFFE8E1D7), onSecondaryContainer = Color(0xFF393530),
-    tertiary = Color(0xFF245C3B), onTertiary = Color(0xFFFFFDF8),
-    tertiaryContainer = Color(0xFFD7EBDA), onTertiaryContainer = Color(0xFF174728),
+    tertiary = Color(0xFFAE3028), onTertiary = Color(0xFFFFF9F1),
+    tertiaryContainer = Color(0xFFF5DDD5), onTertiaryContainer = Color(0xFF7F201B),
     background = Color(0xFFF3F0E9), onBackground = Color(0xFF242321),
     surface = Color(0xFFFFFDF8), onSurface = Color(0xFF242321),
     surfaceVariant = Color(0xFFECE6DC), onSurfaceVariant = Color(0xFF666159),
@@ -99,4 +101,25 @@ fun PillTheme(content: @Composable () -> Unit) {
         ),
         content = content
     )
+}
+
+/** Keep disabled colors supplied by Material; use these on the button, not its label. */
+object PillActionColors {
+    @Composable fun neutral() = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)
+    @Composable fun confirm() = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.tertiary)
+    @Composable fun destructive() = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+    @Composable fun confirmTonal() = ButtonDefaults.filledTonalButtonColors(
+        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+    )
+}
+
+/** Native date/time pickers follow the same action roles as Compose dialogs. */
+fun android.app.AlertDialog.showWithActionColors() {
+    show()
+    val dark = context.resources.configuration.uiMode and
+        android.content.res.Configuration.UI_MODE_NIGHT_MASK == android.content.res.Configuration.UI_MODE_NIGHT_YES
+    val colors = if (dark) DarkPillColors else LightPillColors
+    getButton(android.content.DialogInterface.BUTTON_POSITIVE)?.setTextColor(colors.tertiary.toArgb())
+    getButton(android.content.DialogInterface.BUTTON_NEGATIVE)?.setTextColor(colors.onSurfaceVariant.toArgb())
 }

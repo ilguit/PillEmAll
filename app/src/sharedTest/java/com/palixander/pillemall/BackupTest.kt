@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4

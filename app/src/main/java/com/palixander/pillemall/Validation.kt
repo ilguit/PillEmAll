@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 // Stable codes; persistence and validation never depend on the interface language.
 enum class ValidationError {

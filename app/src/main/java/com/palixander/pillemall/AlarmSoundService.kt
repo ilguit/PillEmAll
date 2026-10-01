@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import android.app.Notification
 import android.app.Service
@@ -24,6 +24,7 @@ class AlarmSoundService : Service() {
             NOTIFICATION_ID,
             Notification.Builder(this, Reminders.CHANNEL)
                 .setSmallIcon(R.drawable.ic_notification)
+                .setColor(getColor(R.color.notification_accent))
                 .setContentTitle(getString(R.string.reminder_title))
                 .setOngoing(true)
                 .setCategory(Notification.CATEGORY_ALARM)
@@ -57,7 +58,7 @@ class AlarmSoundService : Service() {
     }
 
     companion object {
-        private const val ACTION_START = "com.palixander.pillsmanager.START_ALARM_SOUND"
+        private const val ACTION_START = "com.palixander.pillemall.START_ALARM_SOUND"
         private const val EXTRA_SCHEDULED = "scheduled"
         private const val EXTRA_SOUND = "sound"
         private const val NOTIFICATION_ID = 2

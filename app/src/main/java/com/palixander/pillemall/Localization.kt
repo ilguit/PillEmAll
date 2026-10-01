@@ -1,4 +1,4 @@
-package com.palixander.pillsmanager
+package com.palixander.pillemall
 
 import android.content.res.Resources
 import java.time.LocalDate
