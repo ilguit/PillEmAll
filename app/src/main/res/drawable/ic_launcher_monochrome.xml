@@ -6,12 +6,12 @@
     <!-- Ring outer radius 31.8dp fits the centered 33dp adaptive-icon safe radius. -->
     <path
         android:fillColor="@android:color/transparent"
-        android:strokeColor="#AE3028"
+        android:strokeColor="#000000"
         android:strokeWidth="1.6"
         android:pathData="M54,23 A31,31 0,1 1,54 85 A31,31 0,1 1,54 23 Z" />
     <path
         android:fillColor="@android:color/transparent"
-        android:strokeColor="#F2EEE5"
+        android:strokeColor="#000000"
         android:strokeWidth="1.6"
         android:strokeLineCap="round"
         android:pathData="M54.000,29.500 L54.000,26.000 M67.000,31.483 L68.000,29.751 M76.517,41.000 L78.249,40.000 M78.500,54.000 L82.000,54.000 M76.517,67.000 L78.249,68.000 M67.000,76.517 L68.000,78.249 M54.000,78.500 L54.000,82.000 M41.000,76.517 L40.000,78.249 M31.483,67.000 L29.751,68.000 M29.500,54.000 L26.000,54.000 M31.483,41.000 L29.751,40.000 M41.000,31.483 L40.000,29.751" />
@@ -21,8 +21,10 @@
         android:rotation="45"
         android:scaleX="0.47"
         android:scaleY="0.56">
-        <path android:fillColor="#F2EEE5" android:pathData="M54,18 A18,18 0,0 1,72 36 L72,72 A18,18 0,0 1,54 90 A18,18 0,0 1,36 72 L36,36 A18,18 0,0 1,54 18 Z" />
-        <path android:fillColor="#AE3028" android:pathData="M36,54 L72,54 L72,72 A18,18 0,0 1,54 90 A18,18 0,0 1,36 72 Z" />
-        <path android:fillColor="#AE3028" android:pathData="M50,28 A4,4 0,0 1,58 28 L58,40 A4,4 0,0 1,50 40 Z" />
+        <path
+            android:fillColor="#000000"
+            android:fillType="evenOdd"
+            android:pathData="M54,18 A18,18 0,0 1,72 36 L72,72 A18,18 0,0 1,54 90 A18,18 0,0 1,36 72 L36,36 A18,18 0,0 1,54 18 Z M39,51 L69,51 L69,36 A15,15 0,0 0,39 36 Z" />
+        <path android:fillColor="#000000" android:pathData="M50,28 A4,4 0,0 1,58 28 L58,40 A4,4 0,0 1,50 40 Z" />
     </group>
 </vector>

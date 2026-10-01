@@ -1,0 +1,10 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Entire 104 x 156 dp image fits within the 192 dp safe circle
+         of Android's 288 dp splash icon (diagonal: 187.5 dp). -->
+    <item android:width="288dp" android:height="288dp">
+        <shape><solid android:color="#000000" /></shape>
+    </item>
+    <item android:width="104dp" android:height="156dp" android:gravity="center">
+        <bitmap android:src="@drawable/pill_cover" android:gravity="fill" />
+    </item>
+</layer-list>

@@ -127,7 +127,7 @@
     <string name="status_missed">Omitida</string>
     <string name="status_cancelled">Cancelada</string>
     <string name="reminder_channel">Recordatorios de medicación</string>
-    <string name="app_name">Medicamentos</string>
+    <string name="app_name">Pill ’Em All</string>
     <string name="date_range">%1$s — %2$s</string>
     <plurals name="active_courses">
         <item quantity="one">%1$d tratamiento activo</item>
@@ -139,4 +139,24 @@
         <item quantity="many">Ahora · %1$d medicamentos</item>
         <item quantity="other">Ahora · %1$d medicamentos</item>
     </plurals>
+    <string name="delete_empty_course_title">¿Eliminar %1$s en lugar de archivarlo?</string>
+    <string name="delete_empty_course_body">Todavía no se ha registrado ninguna toma de %1$s. El medicamento y su horario se eliminarán de forma permanente en lugar de archivarse.</string>
+    <string name="delete_intake_title">¿Eliminar esta toma?</string>
+    <string name="delete_intake_body">%1$s · %2$s se eliminará permanentemente del historial. Esta acción no se puede deshacer.</string>
+    <string name="full_screen_alarms">Alarmas a pantalla completa</string>
+    <string name="reminder_level">Intensidad del recordatorio</string>
+    <string name="reminder_level_quiet">Silencioso</string>
+    <string name="reminder_level_quiet_description">Una notificación en el panel de notificaciones</string>
+    <string name="reminder_level_noticeable">Sonido y aviso emergente</string>
+    <string name="reminder_level_noticeable_description">Un sonido breve y una notificación emergente</string>
+    <string name="reminder_level_alarm">Alarma</string>
+    <string name="reminder_level_alarm_description">Suena y aparece sobre otras aplicaciones hasta que respondas</string>
+    <string name="snooze_ten_minutes">Posponer 10 minutos</string>
+    <string name="choose_reminder_sound">Elegir sonido del recordatorio</string>
+    <string name="reminder_sound">Sonido: %1$s</string>
+    <string name="system_default">Predeterminado del sistema</string>
+    <string name="use_system_default">Usar el predeterminado del sistema</string>
+    <string name="reminder_channel_quiet">Recordatorios de medicación · silenciosos</string>
+    <string name="reminder_channel_noticeable">Recordatorios de medicación · sonido</string>
+    <string name="reminder_channel_alarm">Recordatorios de medicación · alarma</string>
 </resources>

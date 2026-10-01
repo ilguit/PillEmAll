@@ -127,7 +127,7 @@
     <string name="status_missed">Прапушчаны</string>
     <string name="status_cancelled">Скасаваны</string>
     <string name="reminder_channel">Прыём лекаў</string>
-    <string name="app_name">Лекі</string>
+    <string name="app_name">Pill ’Em All</string>
     <string name="date_range">%1$s — %2$s</string>
     <plurals name="active_courses">
         <item quantity="one">%1$d актыўны курс</item>
@@ -141,4 +141,24 @@
         <item quantity="many">Зараз · %1$d прэпаратаў</item>
         <item quantity="other">Зараз · %1$d прэпарата</item>
     </plurals>
+    <string name="delete_empty_course_title">Выдаліць %1$s замест архівавання?</string>
+    <string name="delete_empty_course_body">Яшчэ не было ніводнага прыёму %1$s. Лекі і іх расклад будуць выдаленыя назаўсёды замест пераносу ў архіў.</string>
+    <string name="delete_intake_title">Выдаліць гэты прыём?</string>
+    <string name="delete_intake_body">%1$s · %2$s будзе назаўсёды выдалена з гісторыі. Гэтае дзеянне немагчыма скасаваць.</string>
+    <string name="full_screen_alarms">Поўнаэкранныя сігналы</string>
+    <string name="reminder_level">Інтэнсіўнасць напаміну</string>
+    <string name="reminder_level_quiet">Ціхі</string>
+    <string name="reminder_level_quiet_description">Апавяшчэнне на панэлі апавяшчэнняў</string>
+    <string name="reminder_level_noticeable">Гук і ўсплывальнае апавяшчэнне</string>
+    <string name="reminder_level_noticeable_description">Кароткі гук і ўсплывальнае апавяшчэнне</string>
+    <string name="reminder_level_alarm">Будзільнік</string>
+    <string name="reminder_level_alarm_description">Гучыць і паказваецца па-над іншымі праграмамі, пакуль вы не адкажаце</string>
+    <string name="snooze_ten_minutes">Адкласці на 10 хвілін</string>
+    <string name="choose_reminder_sound">Выбраць гук напаміну</string>
+    <string name="reminder_sound">Гук: %1$s</string>
+    <string name="system_default">Сістэмны па змаўчанні</string>
+    <string name="use_system_default">Выкарыстоўваць сістэмны гук</string>
+    <string name="reminder_channel_quiet">Напаміны пра лекі · ціхія</string>
+    <string name="reminder_channel_noticeable">Напаміны пра лекі · з гукам</string>
+    <string name="reminder_channel_alarm">Напаміны пра лекі · будзільнік</string>
 </resources>

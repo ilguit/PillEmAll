@@ -148,7 +148,7 @@
     <string name="reminder_channel_noticeable">Medicine reminders · sound</string>
     <string name="reminder_channel_alarm">Medicine reminders · alarm</string>
     <string name="reminder_channel">Medicine reminders</string>
-    <string name="app_name">Medicines</string>
+    <string name="app_name">Pill ’Em All</string>
     <string name="date_range">%1$s — %2$s</string>
     <plurals name="active_courses">
         <item quantity="one">%1$d active course</item>

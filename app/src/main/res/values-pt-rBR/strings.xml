@@ -127,7 +127,7 @@
     <string name="status_missed">Não tomada</string>
     <string name="status_cancelled">Cancelada</string>
     <string name="reminder_channel">Lembretes de medicamentos</string>
-    <string name="app_name">Medicamentos</string>
+    <string name="app_name">Pill ’Em All</string>
     <string name="date_range">%1$s — %2$s</string>
     <plurals name="active_courses">
         <item quantity="one">%1$d tratamento ativo</item>
@@ -139,4 +139,24 @@
         <item quantity="many">Agora · %1$d medicamentos</item>
         <item quantity="other">Agora · %1$d medicamentos</item>
     </plurals>
+    <string name="delete_empty_course_title">Excluir %1$s em vez de arquivar?</string>
+    <string name="delete_empty_course_body">Nenhuma tomada de %1$s foi registrada ainda. O medicamento e seus horários serão excluídos permanentemente em vez de serem arquivados.</string>
+    <string name="delete_intake_title">Excluir esta tomada?</string>
+    <string name="delete_intake_body">%1$s · %2$s será removido permanentemente do histórico. Esta ação não pode ser desfeita.</string>
+    <string name="full_screen_alarms">Alarmes em tela cheia</string>
+    <string name="reminder_level">Intensidade do lembrete</string>
+    <string name="reminder_level_quiet">Silencioso</string>
+    <string name="reminder_level_quiet_description">Uma notificação no painel de notificações</string>
+    <string name="reminder_level_noticeable">Som e aviso na tela</string>
+    <string name="reminder_level_noticeable_description">Um som breve e uma notificação flutuante</string>
+    <string name="reminder_level_alarm">Alarme</string>
+    <string name="reminder_level_alarm_description">Toca e aparece sobre outros aplicativos até você responder</string>
+    <string name="snooze_ten_minutes">Adiar por 10 minutos</string>
+    <string name="choose_reminder_sound">Escolher som do lembrete</string>
+    <string name="reminder_sound">Som: %1$s</string>
+    <string name="system_default">Padrão do sistema</string>
+    <string name="use_system_default">Usar padrão do sistema</string>
+    <string name="reminder_channel_quiet">Lembretes de medicamentos · silenciosos</string>
+    <string name="reminder_channel_noticeable">Lembretes de medicamentos · som</string>
+    <string name="reminder_channel_alarm">Lembretes de medicamentos · alarme</string>
 </resources>

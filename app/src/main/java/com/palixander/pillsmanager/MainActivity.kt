@@ -1,3 +1,5 @@
+@file:OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+
 package com.palixander.pillsmanager
 
 import android.Manifest
@@ -22,18 +24,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.withLock
@@ -45,40 +42,13 @@ class MainActivity : ComponentActivity() {
     private var link by mutableStateOf<Intent?>(null)
     private var resumed by mutableIntStateOf(0)
     override fun onCreate(savedInstanceState: Bundle?) {
+        setTheme(R.style.AppTheme)
         super.onCreate(savedInstanceState)
         updateAlarmWindow(intent)
         enableEdgeToEdge()
         link = intent
         setContent {
-            val dark = isSystemInDarkTheme()
-            val colors = if (dark) darkColorScheme(
-                primary = Color(0xFF87D8C8), onPrimary = Color(0xFF00382F),
-                primaryContainer = Color(0xFF005046), onPrimaryContainer = Color(0xFFA4F2E1),
-                secondary = Color(0xFFC6C9FF), secondaryContainer = Color(0xFF3D4277),
-                background = Color(0xFF101413), surface = Color(0xFF171C1B),
-                surfaceVariant = Color(0xFF252B29), outlineVariant = Color(0xFF3D4542)
-            ) else lightColorScheme(
-                primary = Color(0xFF006B5C), onPrimary = Color.White,
-                primaryContainer = Color(0xFFA7F2DF), onPrimaryContainer = Color(0xFF00201A),
-                secondary = Color(0xFF50558A), secondaryContainer = Color(0xFFE1E2FF),
-                background = Color(0xFFF7F9F6), surface = Color(0xFFFFFFFF),
-                surfaceVariant = Color(0xFFEDF1EE), outlineVariant = Color(0xFFD9E1DD),
-                error = Color(0xFFBA1A1A), errorContainer = Color(0xFFFFDAD6)
-            )
-            val typography = Typography(
-                headlineLarge = TextStyle(fontSize = 32.sp, lineHeight = 38.sp, fontWeight = FontWeight.Bold),
-                headlineSmall = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.Bold),
-                titleLarge = TextStyle(fontSize = 20.sp, lineHeight = 26.sp, fontWeight = FontWeight.Bold),
-                titleMedium = TextStyle(fontSize = 17.sp, lineHeight = 23.sp, fontWeight = FontWeight.SemiBold),
-                bodyLarge = TextStyle(fontSize = 16.sp, lineHeight = 23.sp),
-                bodyMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
-                labelLarge = TextStyle(fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.SemiBold)
-            )
-            MaterialTheme(colorScheme = colors, typography = typography, shapes = Shapes(
-                extraSmall = RoundedCornerShape(8.dp), small = RoundedCornerShape(12.dp),
-                medium = RoundedCornerShape(20.dp), large = RoundedCornerShape(28.dp),
-                extraLarge = RoundedCornerShape(32.dp)
-            )) {
+            PillTheme {
                 PillsScreen(application as PillsApp, link, resumed, { link = null }, this)
             }
         }
@@ -207,14 +177,9 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
         return
     }
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
-        CenterAlignedTopAppBar(
-            title = {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(listOf(resources.getString(R.string.today), resources.getString(R.string.history), resources.getString(R.string.profiles))[tab], style = MaterialTheme.typography.titleLarge)
-                    if (tab == 0) Text(LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(resources.configuration.locales[0])), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+        PillHeader(
+            title = listOf(resources.getString(R.string.today), resources.getString(R.string.history), resources.getString(R.string.profiles))[tab],
+            subtitle = if (tab == 0) LocalDate.now().format(DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.FULL).withLocale(resources.configuration.locales[0])) else null
         )
     }, bottomBar = {
         NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
@@ -233,10 +198,10 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
         LazyColumn(Modifier.fillMaxSize().padding(padding), contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
             if (busy) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
             if (tab == 0 && (!permissions || needsFullScreenAccess)) item {
-                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer), shape = MaterialTheme.shapes.large) {
+                Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), shape = MaterialTheme.shapes.large, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
                     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Surface(shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.error.copy(alpha = .12f)) { Icon(ImageVector.vectorResource(R.drawable.ic_bell), null, Modifier.padding(10.dp), tint = MaterialTheme.colorScheme.error) }
+                            Surface(shape = RoundedCornerShape(14.dp), color = PillColors.warning.copy(alpha = .12f)) { Icon(ImageVector.vectorResource(R.drawable.ic_bell), null, Modifier.padding(10.dp), tint = PillColors.warning) }
                             Column { Text(resources.getString(R.string.reminders_setup), style = MaterialTheme.typography.titleMedium); Text(resources.getString(R.string.reminders_subtitle), style = MaterialTheme.typography.bodyMedium) }
                         }
                         Text(resources.getString(R.string.reminders_explanation), style = MaterialTheme.typography.bodyMedium)
@@ -270,13 +235,14 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         sectionTitle?.let { Text(it, style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)) }
                         Card(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
+                        if (entry.rows.any { Schedule.status(it, now) == Status.WAITING }) HorizontalDivider(thickness = 3.dp, color = PillColors.button)
                         Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top) {
-                                Column(Modifier.weight(1f)) {
-                                    Text(android.text.format.DateFormat.getTimeFormat(LocalContext.current).format(java.util.Date(entry.scheduled)), style = MaterialTheme.typography.headlineLarge, color = MaterialTheme.colorScheme.primary)
+                            FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Column {
+                                    Text(android.text.format.DateFormat.getTimeFormat(LocalContext.current).format(java.util.Date(entry.scheduled)), style = PillTypography.time, color = MaterialTheme.colorScheme.onSurface)
                                     Text(displayDate(Instant.ofEpochMilli(entry.scheduled).atZone(ZoneId.systemDefault()).toLocalDate(), resources), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                                FlowRow(horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                                     entry.rows.map { Schedule.status(it, now) }.distinct().forEach { StatusBadge(it) }
                                 }
                             }
@@ -284,8 +250,8 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                             val actionable = entry.rows.filter { Schedule.status(it, now) in listOf(Status.WAITING, Status.PLANNED) }
                             val waiting = actionable.filter { Schedule.status(it, now) == Status.WAITING }
                             if (waiting.isNotEmpty()) {
-                                Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
-                                    Button(onClick = { act { app.repository.mark(waiting.map { it.id }.toSet(), "TAKEN", now) } }, shape = MaterialTheme.shapes.small) { Icon(ImageVector.vectorResource(R.drawable.ic_check), null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(resources.getString(R.string.taken)) }
+                                FlowRow(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), onClick = { act { app.repository.mark(waiting.map { it.id }.toSet(), "TAKEN", now) } }, shape = MaterialTheme.shapes.small) { Icon(ImageVector.vectorResource(R.drawable.ic_check), null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(resources.getString(R.string.taken)) }
                                     TextButton(onClick = {
                                         group = waiting.map { it.id }.toSet(); correcting = false; backdating = true
                                     }) { Text(resources.getString(R.string.taken_earlier)) }
@@ -302,29 +268,32 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             if (tab == 2) {
                 item { BackupControls(app, enabled = !busy && data.loaded) }
                 item {
-                    Button(onClick = { editProfile = Profile(name = "") }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = MaterialTheme.shapes.medium) {
+                    Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), onClick = { editProfile = Profile(name = "") }, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = MaterialTheme.shapes.medium) {
                         Text("＋", style = MaterialTheme.typography.titleLarge); Spacer(Modifier.width(8.dp)); Text(resources.getString(R.string.add_profile))
                     }
                 }
                 items(data.profiles, key = { it.id }) { p ->
                     Card(Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.large, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) { Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                            Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
-                                Text(p.name.trim().take(1).uppercase(), Modifier.padding(horizontal = 15.dp, vertical = 10.dp), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                        AdaptiveDetailsRow(details = {
+                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+                                    Text(p.name.trim().take(1).uppercase(), Modifier.padding(horizontal = 15.dp, vertical = 10.dp), style = MaterialTheme.typography.titleLarge, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                                }
+                                Spacer(Modifier.width(12.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(p.name, style = MaterialTheme.typography.headlineSmall)
+                                    val activeCount = data.prescriptions.count { it.profileId == p.id && !it.archived }
+                                    Text(resources.getQuantityString(R.plurals.active_courses, activeCount, activeCount), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
                             }
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(p.name, style = MaterialTheme.typography.headlineSmall)
-                                val activeCount = data.prescriptions.count { it.profileId == p.id && !it.archived }
-                                Text(resources.getQuantityString(R.plurals.active_courses, activeCount, activeCount), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
+                        }, actions = {
                             IconButton(onClick = { editProfile = p }) {
                                 Icon(painterResource(R.drawable.ic_edit), contentDescription = resources.getString(R.string.edit_profile, p.name))
                             }
                             IconButton(onClick = { delete = p }) {
                                 Icon(painterResource(R.drawable.ic_delete), contentDescription = resources.getString(R.string.delete_profile, p.name), tint = MaterialTheme.colorScheme.error)
                             }
-                        }
+                        })
                         FilledTonalButton(modifier = Modifier.fillMaxWidth(), onClick = { editPrescription = Prescription(profileId = p.id, name = "", dose = "", times = "09:00", start = LocalDate.now().toString(), end = null, zone = ZoneId.systemDefault().id, generatedUntil = now) }) {
                             Text(resources.getString(R.string.add_medicine))
                         }
@@ -333,19 +302,22 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                             .forEach { r ->
                             val ended = r.end?.let { LocalDate.parse(it).isBefore(Instant.ofEpochMilli(now).atZone(ZoneId.of(r.zone)).toLocalDate()) } == true
                             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-                            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Column(Modifier.width(64.dp)) {
-                                    Text(
-                                        r.times.split(",").map(LocalTime::parse).distinct().sorted().joinToString(" · "),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
+                            AdaptiveDetailsRow(details = {
+                                Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                                    Column(Modifier.widthIn(min = 64.dp, max = 88.dp * LocalDensity.current.fontScale).padding(end = 8.dp)) {
+                                        Text(
+                                            r.times.split(",").map(LocalTime::parse).distinct().sorted().joinToString(" · "),
+                                            style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                                        Text(r.name, style = MaterialTheme.typography.titleMedium)
+                                        Text(r.dose, style = MaterialTheme.typography.bodyLarge)
+                                        Text(resources.getString(R.string.course_dates, displayDate(LocalDate.parse(r.start), resources), r.end?.let { displayDate(LocalDate.parse(it), resources) } ?: resources.getString(R.string.no_end)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
                                 }
-                                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                                    Text(r.name, style = MaterialTheme.typography.titleMedium)
-                                    Text(r.dose, style = MaterialTheme.typography.bodyLarge)
-                                    Text(resources.getString(R.string.course_dates, displayDate(LocalDate.parse(r.start), resources), r.end?.let { displayDate(LocalDate.parse(it), resources) } ?: resources.getString(R.string.no_end)), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                }
+                            }, actions = {
                                 if (!r.archived && !ended) Row {
                                     IconButton(onClick = { editPrescription = r }) {
                                         Icon(painterResource(R.drawable.ic_edit), contentDescription = resources.getString(R.string.edit_medicine, r.name))
@@ -354,7 +326,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                                         Icon(painterResource(R.drawable.ic_archive), contentDescription = resources.getString(R.string.archive_course, r.name), tint = MaterialTheme.colorScheme.primary)
                                     }
                                 }
-                            }
+                            })
                             if (r.archived || ended) {
                                 StatusPill(if (r.archived) resources.getString(R.string.archived) else resources.getString(R.string.course_finished))
                                 TextButton(onClick = { editPrescription = r.copy(id = java.util.UUID.randomUUID().toString(), start = LocalDate.now(ZoneId.of(r.zone)).toString(), end = null, archived = false, generatedUntil = now) }) { Text(resources.getString(R.string.repeat_course)) }
@@ -420,7 +392,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
     editProfile?.let { p ->
         var name by remember(p.id) { mutableStateOf(p.name) }
         FormDialog(resources.getString(R.string.profile), { editProfile = null }, { if (name.isNotBlank()) { act { dao.saveProfile(p.copy(name = name.trim())) }; editProfile = null } }, name.isNotBlank()) {
-            OutlinedTextField(name, { name = it }, label = { Text(resources.getString(R.string.name)) }, singleLine = true)
+            OutlinedTextField(name, { name = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.name)) }, singleLine = true)
         }
     }
     editPrescription?.let { p -> PrescriptionDialog(p, { editPrescription = null }) { value -> act { app.repository.save(value) }; editPrescription = null } }
@@ -506,11 +478,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
     val profileNames = profiles.associate { it.id to it.name }
     val groups = rows.groupBy { it.profileId }.entries.sortedBy { profileNames[it.key]?.lowercase() ?: "" }
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = {
-        TopAppBar(
-            title = { Text(resources.getString(R.string.reminder_title), style = MaterialTheme.typography.titleLarge) },
-            navigationIcon = { IconButton(onClick = close) { Icon(ImageVector.vectorResource(R.drawable.ic_close), resources.getString(R.string.close)) } },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
-        )
+        PillHeader(title = resources.getString(R.string.reminder_title), close = close)
     }) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding),
@@ -518,6 +486,9 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             if (busy) item { LinearProgressIndicator(Modifier.fillMaxWidth()) }
+            rows.map { it.scheduled }.distinct().singleOrNull()?.let { scheduled ->
+                item { Text(android.text.format.DateFormat.getTimeFormat(LocalContext.current).format(java.util.Date(scheduled)), style = PillTypography.time) }
+            }
             if (snooze != null && groups.isNotEmpty()) item {
                 OutlinedButton(modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), enabled = !busy, onClick = snooze) {
                     Text(resources.getString(R.string.snooze_ten_minutes))
@@ -533,7 +504,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                 ) {
                     Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
+                            Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.secondaryContainer) {
                                 Text(profileNames[profileId].orEmpty().take(1).uppercase(), Modifier.padding(horizontal = 15.dp, vertical = 10.dp), style = MaterialTheme.typography.titleLarge)
                             }
                             Spacer(Modifier.width(12.dp))
@@ -547,7 +518,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                             MedicineDoseRow(medicine.name, medicine.dose)
                         }
                         val medicineIds = medicines.map { it.id }.toSet()
-                        Button(modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), enabled = !busy, onClick = { markTaken(medicineIds) }) {
+                        Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), enabled = !busy, onClick = { markTaken(medicineIds) }) {
                             Icon(ImageVector.vectorResource(R.drawable.ic_check), null, Modifier.size(18.dp)); Spacer(Modifier.width(8.dp)); Text(resources.getString(R.string.mark_taken))
                         }
                         OutlinedButton(modifier = Modifier.fillMaxWidth(), enabled = !busy, onClick = { moreActions(medicineIds) }) {
@@ -575,34 +546,33 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = .55f))
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(Modifier.padding(horizontal = 22.dp, vertical = 26.dp), verticalArrangement = Arrangement.spacedBy(10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface.copy(alpha = .72f)) {
+            Surface(shape = RoundedCornerShape(10.dp), color = MaterialTheme.colorScheme.surface.copy(alpha = .72f)) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_pill), null, Modifier.padding(14.dp).size(28.dp), tint = MaterialTheme.colorScheme.primary)
             }
             Text(title, style = MaterialTheme.typography.headlineSmall)
             Text(text, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            action?.let { Button(onClick = onClick, modifier = Modifier.padding(top = 4.dp)) { Text(it) } }
+            action?.let { Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), onClick = onClick, modifier = Modifier.padding(top = 4.dp)) { Text(it) } }
         }
     }
 }
 @Composable private fun StatusPill(text: String) {
-    Surface(shape = RoundedCornerShape(99.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+    Surface(shape = RoundedCornerShape(5.dp), color = MaterialTheme.colorScheme.surface, border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {
         Text(text, Modifier.padding(horizontal = 10.dp, vertical = 5.dp), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 @Composable private fun StatusBadge(status: Status) {
     val resources = androidx.compose.ui.platform.LocalResources.current
-    val dark = isSystemInDarkTheme()
-    val (background, foreground) = when (status) {
-        Status.TAKEN -> if (dark) Color(0xFF163D2B) to Color(0xFFA0EDBD) else Color(0xFFD5F5E2) to Color(0xFF155532)
-        Status.WAITING -> if (dark) Color(0xFF49370C) to Color(0xFFFFDD8C) else Color(0xFFFFEAB3) to Color(0xFF664900)
-        Status.PLANNED -> if (dark) Color(0xFF173553) to Color(0xFFA9D2FF) else Color(0xFFDCEBFF) to Color(0xFF164E83)
-        Status.MISSED -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
-        Status.CANCELLED -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
+    val foreground = when (status) {
+        Status.TAKEN -> PillColors.success
+        Status.WAITING -> PillColors.warning
+        Status.PLANNED, Status.CANCELLED -> MaterialTheme.colorScheme.onSurfaceVariant
+        Status.MISSED -> MaterialTheme.colorScheme.error
     }
-    Surface(color = background, contentColor = foreground, shape = RoundedCornerShape(99.dp)) {
+    Surface(color = MaterialTheme.colorScheme.surface, contentColor = foreground, shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, foreground.copy(alpha = .65f))) {
         Text(status.label(resources), Modifier.padding(horizontal = 10.dp, vertical = 5.dp), style = MaterialTheme.typography.labelMedium)
     }
 }
@@ -640,7 +610,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
 }
 @Composable private fun FormDialog(title: String, close: () -> Unit, save: () -> Unit, valid: Boolean = true, content: @Composable ColumnScope.() -> Unit) {
     val resources = androidx.compose.ui.platform.LocalResources.current
-    AlertDialog(onDismissRequest = close, title = { Text(title) }, text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp), content = content) }, confirmButton = { TextButton(onClick = save, enabled = valid) { Text(resources.getString(R.string.save)) } }, dismissButton = { TextButton(onClick = close) { Text(resources.getString(R.string.cancel)) } })
+    AlertDialog(onDismissRequest = close, title = { Text(title) }, text = { Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(10.dp), content = content) }, confirmButton = { Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), onClick = save, enabled = valid) { Text(resources.getString(R.string.save)) } }, dismissButton = { TextButton(onClick = close) { Text(resources.getString(R.string.cancel)) } })
 }
 @Composable private fun PrescriptionDialog(p: Prescription, close: () -> Unit, save: (Prescription) -> Unit) {
     val resources = androidx.compose.ui.platform.LocalResources.current
@@ -680,8 +650,8 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
     }
     val valid = runCatching { require(name.isNotBlank() && dose.isNotBlank() && times.isNotEmpty()); val first = LocalDate.parse(start); require(end.isBlank() || !LocalDate.parse(end).isBefore(first)) }.isSuccess
     FormDialog(resources.getString(R.string.prescription), close, { save(p.copy(name = name, dose = dose, times = times.joinToString(","), start = start, end = end.takeIf { it.isNotBlank() }, reminderLevel = reminderLevel.name, reminderSound = reminderSound)) }, valid) {
-        OutlinedTextField(name, { name = it }, label = { Text(resources.getString(R.string.medicine_name)) })
-        OutlinedTextField(dose, { dose = it }, label = { Text(resources.getString(R.string.dose_hint)) })
+        OutlinedTextField(name, { name = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.medicine_name)) })
+        OutlinedTextField(dose, { dose = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.dose_hint)) })
         Text(resources.getString(R.string.intake_time), style = MaterialTheme.typography.titleSmall)
         times.forEach { time ->
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -716,8 +686,8 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             if (reminderSound != null) TextButton(onClick = { reminderSound = null }) { Text(resources.getString(R.string.use_system_default)) }
         }
         Text(resources.getString(R.string.daily_zone, p.zone), style = MaterialTheme.typography.bodySmall)
-        OutlinedTextField(start, { start = it }, label = { Text(resources.getString(R.string.course_start)) }, trailingIcon = { TextButton(onClick = { pickDate(start) { start = it } }) { Text(resources.getString(R.string.date)) } })
-        OutlinedTextField(end, { end = it }, label = { Text(resources.getString(R.string.course_end)) }, trailingIcon = { TextButton(onClick = { pickDate(end) { end = it } }) { Text(resources.getString(R.string.date)) } }, supportingText = { Text(resources.getString(R.string.course_end_hint)) })
+        OutlinedTextField(start, { start = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.course_start)) }, trailingIcon = { TextButton(onClick = { pickDate(start) { start = it } }) { Text(resources.getString(R.string.date)) } })
+        OutlinedTextField(end, { end = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.course_end)) }, trailingIcon = { TextButton(onClick = { pickDate(end) { end = it } }) { Text(resources.getString(R.string.date)) } }, supportingText = { Text(resources.getString(R.string.course_end_hint)) })
         if (!valid) Text(resources.getString(R.string.prescription_invalid), color = MaterialTheme.colorScheme.error)
     }
 }
@@ -765,7 +735,7 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
             if (rows.isNotEmpty()) {
                 val selectedRows = rows.filter { it.id in selected }
                 val scheduled = selectedRows.map { it.scheduled }.distinct().singleOrNull()
-                if (scheduled != null && scheduled <= now) Button(
+                if (scheduled != null && scheduled <= now) Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton),
                     modifier = Modifier.fillMaxWidth(),
                     enabled = selectedRows.isNotEmpty(),
                     onClick = { save(selected, "TAKEN", scheduled) }
@@ -775,8 +745,8 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                 if (editActual) {
                     HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                     Text(resources.getString(R.string.actual_time_title), style = MaterialTheme.typography.titleMedium)
-                    OutlinedTextField(actual, { actual = it }, label = { Text(resources.getString(R.string.actual_time_hint)) }, supportingText = { Text(resources.getString(R.string.phone_zone, ZoneId.systemDefault().id)) })
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedTextField(actual, { actual = it }, modifier = Modifier.fillMaxWidth(), label = { Text(resources.getString(R.string.actual_time_hint)) }, supportingText = { Text(resources.getString(R.string.phone_zone, ZoneId.systemDefault().id)) })
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         TextButton(onClick = {
                             val value = runCatching { LocalDateTime.parse(actual, stamp).toLocalDate() }.getOrDefault(LocalDate.now())
                             DatePickerDialog(context, { _, y, m, d -> changeActual(date = LocalDate.of(y, m + 1, d)) }, value.year, value.monthValue - 1, value.dayOfMonth).show()
@@ -787,11 +757,55 @@ fun PillsScreen(app: PillsApp, link: Intent?, resumed: Int, consumeLink: () -> U
                         }) { Text(resources.getString(R.string.pick_time)) }
                     }
                     if (parsed == null || parsed > now) Text(resources.getString(R.string.actual_time_invalid), color = MaterialTheme.colorScheme.error)
-                    Button(modifier = Modifier.fillMaxWidth(), enabled = selected.isNotEmpty() && parsed != null && parsed <= now, onClick = { save(selected, "TAKEN", parsed!!) }) { Text(resources.getString(R.string.save_actual_time)) }
+                    Button(colors = ButtonDefaults.buttonColors(containerColor = PillColors.button, contentColor = PillColors.onButton), modifier = Modifier.fillMaxWidth(), enabled = selected.isNotEmpty() && parsed != null && parsed <= now, onClick = { save(selected, "TAKEN", parsed!!) }) { Text(resources.getString(R.string.save_actual_time)) }
                 }
                 if (correction || rows.filter { it.id in selected }.all { Schedule.status(it, now) == Status.WAITING }) OutlinedButton(modifier = Modifier.fillMaxWidth(), enabled = selected.isNotEmpty(), onClick = { save(selected, "MISSED", now) }) { Text(resources.getString(R.string.mark_missed)) }
                 if (correction) TextButton(onClick = { save(selected, null, now) }, enabled = selected.isNotEmpty()) { Text(resources.getString(R.string.undo_mark)) }
             }
         }
     }, confirmButton = { TextButton(onClick = close) { Text(resources.getString(R.string.close)) } })
+}
+
+/** A content-sized header keeps translated titles and enlarged text visible. */
+@Composable private fun PillHeader(title: String, subtitle: String? = null, close: (() -> Unit)? = null) {
+    val resources = androidx.compose.ui.platform.LocalResources.current
+    var showCover by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    if (showCover) PillCoverDialog { showCover = false }
+    Surface(color = MaterialTheme.colorScheme.background) {
+        Column(Modifier.fillMaxWidth().windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))) {
+            if (close != null) IconButton(onClick = close, modifier = Modifier.align(Alignment.Start)) {
+                Icon(ImageVector.vectorResource(R.drawable.ic_close), resources.getString(R.string.close))
+            }
+            Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Box(Modifier.widthIn(max = 280.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Image(
+                        painter = painterResource(R.drawable.pill_wordmark),
+                        contentDescription = resources.getString(R.string.app_name),
+                        modifier = Modifier.fillMaxWidth(1f / 1.5f).heightIn(min = 48.dp).clickable { showCover = true }
+                    )
+                }
+                Text(title, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
+                subtitle?.let { Text(it, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center) }
+            }
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+        }
+    }
+}
+
+/** Preserve inline actions where they fit; give names their full width on small/large-text layouts. */
+@Composable private fun AdaptiveDetailsRow(details: @Composable () -> Unit, actions: @Composable () -> Unit) {
+    val fontScale = LocalDensity.current.fontScale
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        if (maxWidth < 300.dp || fontScale > 1.3f) {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                details()
+                Row(Modifier.align(Alignment.End), verticalAlignment = Alignment.CenterVertically) { actions() }
+            }
+        } else {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.weight(1f)) { details() }
+                actions()
+            }
+        }
+    }
 }

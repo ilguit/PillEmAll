@@ -148,7 +148,7 @@
     <string name="reminder_channel_noticeable">Приём лекарств · со звуком</string>
     <string name="reminder_channel_alarm">Приём лекарств · будильник</string>
     <string name="reminder_channel">Приём лекарств</string>
-    <string name="app_name">Лекарства</string>
+    <string name="app_name">Pill ’Em All</string>
     <plurals name="active_courses">
         <item quantity="one">%1$d активный курс</item>
         <item quantity="few">%1$d активных курса</item>
